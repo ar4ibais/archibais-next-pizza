@@ -1,0 +1,58 @@
+import Link from "next/link"
+import React from "react"
+import { Title } from "./title"
+import { Button } from "../ui/button"
+import { Plus } from "lucide-react"
+
+interface Props {
+  id?: number
+  name: string
+  price: number
+  count?: number
+  imageUrl?: string
+  className?: string
+}
+
+const ProductCard: React.FC<Props> = ({
+  id,
+  name,
+  price,
+  count,
+  imageUrl,
+  className,
+}) => {
+  return (
+    <div className={className}>
+      <Link href={`/products/${id}`}>
+        <div className="flex h-[260px] justify-center rounded-lg bg-secondary p-6">
+          <img className="h-[215px] w-[215px]" src={imageUrl} alt={name} />
+        </div>
+        <Title text={name} size="sm" className="mt-3 mb-1 font-bold" />
+        <p className="text-sm text-gray-400">
+          Цыпленок, моцарелла, сыры чеддер и пармезан, сырный соус, томаты, соус
+          альфредо, чеснок
+        </p>
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-[20px]">
+            от <b>{price} ₽</b>
+          </span>
+
+          <Button variant="secondary">
+            <Plus size={16} className="mr-1" />
+            Добавить
+          </Button>
+          {/* {count ? (
+            <CountButton value={count} size="lg" />
+          ) : (
+            <Button variant="secondary">
+              <Plus size={16} className="mr-1" />
+              Добавить
+            </Button>
+          )} */}
+        </div>
+      </Link>
+    </div>
+  )
+}
+
+export default ProductCard
