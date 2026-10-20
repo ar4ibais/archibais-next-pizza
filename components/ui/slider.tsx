@@ -1,51 +1,78 @@
+"use client"
+
+import * as React from "react"
 import { Slider as SliderPrimitive } from "@base-ui/react/slider"
-import { cn } from "cn"
 
-function Slider({
-  className,
-  defaultValue,
-  value,
-  min = 0,
-  max = 100,
-  ...props
-}: SliderPrimitive.Root.Props) {
-  const _values = Array.isArray(value)
-    ? value
-    : Array.isArray(defaultValue)
-      ? defaultValue
-      : [min, max]
+import { cn } from "@/lib/utils"
 
-  return (
-    <SliderPrimitive.Root
-      className={cn("data-horizontal:w-full data-vertical:h-full", className)}
-      data-slot="slider"
-      defaultValue={defaultValue}
-      value={value}
-      min={min}
-      max={max}
-      thumbAlignment="edge"
-      {...props}
-    >
-      <SliderPrimitive.Control className="relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:min-h-40 data-vertical:w-auto data-vertical:flex-col">
-        <SliderPrimitive.Track
-          data-slot="slider-track"
-          className="relative grow overflow-hidden rounded-full bg-input/90 select-none data-horizontal:h-2 data-horizontal:w-full data-vertical:h-full data-vertical:w-2"
-        >
-          <SliderPrimitive.Indicator
-            data-slot="slider-range"
-            className="bg-primary select-none data-horizontal:h-full data-vertical:w-full"
-          />
-        </SliderPrimitive.Track>
-        {Array.from({ length: _values.length }, (_, index) => (
-          <SliderPrimitive.Thumb
-            data-slot="slider-thumb"
-            key={index}
-            className="block h-4 w-6 shrink-0 rounded-full bg-white shadow-md ring-1 ring-black/10 transition-[color,box-shadow,background-color] select-none not-dark:bg-clip-padding hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-vertical:h-6 data-vertical:w-4"
-          />
-        ))}
-      </SliderPrimitive.Control>
-    </SliderPrimitive.Root>
-  )
+type SliderProps = {
+  className?: string
+  min: number
+  max: number
+  step: number
+  formatLabel?: (value: number) => string
+  value?: readonly number[]
+  defaultValue?: readonly number[]
+  onValueChange?: (values: number[]) => void
 }
 
-export { Slider }
+const RangeSlider = React.forwardRef<HTMLDivElement, SliderProps>(
+  (
+    {
+      className,
+      min,
+      max,
+      step,
+      formatLabel,
+      value,
+      defaultValue,
+      onValueChange,
+    },
+    ref
+  ) => {
+    const [localValues, setLocalValues] = React.useState<number[]>(() => [
+      ...(defaultValue ?? [min, max]),
+    ])
+    const values = value ?? localValues
+
+    return (
+      <SliderPrimitive.Root
+        ref={ref}
+        min={min}
+        max={max}
+        step={step}
+        value={values}
+        thumbCollisionBehavior="none"
+        onValueChange={(newValues) => {
+          setLocalValues([...newValues])
+          onValueChange?.([...newValues])
+        }}
+        className={cn("mb-6 w-full", className)}
+      >
+        <SliderPrimitive.Control className="relative flex h-4 w-full touch-none items-center select-none">
+          <SliderPrimitive.Track className="relative h-1 w-full grow overflow-hidden rounded-full bg-primary/20">
+            <SliderPrimitive.Indicator className="absolute h-full bg-primary" />
+          </SliderPrimitive.Track>
+          {values.map((value, index) => (
+            <SliderPrimitive.Thumb
+              key={index}
+              index={index}
+              aria-label={
+                index === 0 ? "Минимальная цена" : "Максимальная цена"
+              }
+              className="block h-4 w-4 rounded-full border border-primary/50 bg-white shadow transition-colors focus-within:ring-1 focus-within:ring-ring data-disabled:pointer-events-none data-disabled:opacity-50"
+            >
+              <span className="pointer-events-none absolute top-5 left-1/2 -translate-x-1/2 text-sm whitespace-nowrap">
+                {formatLabel ? formatLabel(value) : value}
+              </span>
+            </SliderPrimitive.Thumb>
+          ))}
+        </SliderPrimitive.Control>
+      </SliderPrimitive.Root>
+    )
+  }
+)
+
+RangeSlider.displayName = "RangeSlider"
+
+export { RangeSlider }
